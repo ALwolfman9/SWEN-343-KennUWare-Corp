@@ -1,0 +1,238 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+
+    <screen name="viewdatafile">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="main"/>
+                <set field="titleProperty" value="WebtoolsDataFileMainTitle"/>
+                <set field="activeSubMenuItem" value="data"/>
+                <script location="component://webtools/webapp/webtools/WEB-INF/actions/datafile/viewdatafile.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonImportExportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <platform-specific><html><html-template location="component://webtools/webapp/webtools/datafile/viewdatafile.ftl"/></html></platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebtoolsLayoutDemo">
+        <!-- Demonstrates UI layout best practices and serves as a visual theme test jig.
+        For more information:
+        https://cwiki.apache.org/OFBADMIN/user-interface-layout-best-practices.html
+        https://cwiki.apache.org/OFBADMIN/html-and-css-best-practices.html
+        https://cwiki.apache.org/OFBIZ/ofbiz-maincsscss-html-element-collection-styles.html
+        -->
+        <section>
+            <actions>
+                <set field="debugMode" from-field="parameters.debugMode" type="Boolean" default-value="false" />
+            
+                <set field="testtest" value="test ' asdf ' &gt; asdf &lt; asdfasdf" />
+                <property-map resource="WebtoolsUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="WebtoolsLayoutDemo"/>
+                <set field="activeMainMenuItem" value="LayoutDemo"/>
+                <set field="activeSubMenuItem" value="Selected"/>
+                <set field="demoText" value="${uiLabelMap.WebtoolsLayoutDemoText}" global="true"/>
+                <set field="errorMessage" from-field="demoText" global="true"/>
+                <set field="eventMessage" from-field="demoText" global="true"/>
+                <set field="demoTargetUrl" value="WebtoolsLayoutDemo"/>
+                <set field="demoParam1" value="one"/>
+                <set field="demoParam2" value="two"/>
+                <set field="demoParam3" value="three"/>
+                <set field="demoMap.name" value="${uiLabelMap.WebtoolsLayoutDemo}"/>
+                <set field="demoMap.description" value="${uiLabelMap.WebtoolsLayoutDemoText}"/>
+                <set field="demoMap.dropDown" value="Y"/>
+                <set field="demoMap.checkBox" value="Y"/>
+                <set field="demoMap.radioButton" value="Y"/>
+                <set field="demoList[]" from-field="demoMap"/>
+                <set field="demoList[]" from-field="demoMap"/>
+                <set field="demoList[]" from-field="demoMap"/>
+                <set field="altRowStyle" value=""/>
+                <set field="headerStyle" value="header-row-1"/>
+                <set field="tableStyle" value="${styles.table_data_list} light-grid"/>
+                <set field="ofbizWidgetsLayoutScreenLocation" value="component://webtools/widget/MiscScreens.xml#WebtoolsLayoutDemoOfbizWidgets" />
+                <set field="parameters.showLeftColumn" value="Y" />
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true and not empty parameters.showLeftColumn and parameters.showLeftColumn == 'Y'}" override-by-auto-include="true">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-has-permission permission="OFBTOOLS" action="_VIEW"/>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="LayoutDemoSideBar" location="component://webtools/widget/Menus.xml"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="OFBTOOLS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section name="Grid">
+                                    <widgets>
+                                        <platform-specific><html><html-template location="component://webtools/webapp/webtools/layout/layoutdemo.ftl"/></html></platform-specific>
+                                        <!-- let the FTL include this because it adds useful tests
+                                        <horizontal-separator/>
+                                        <label text="Widget tests" style="h" />
+                                        <include-screen name="WebtoolsLayoutDemoOfbizWidgets" />-->
+                                    </widgets>
+                                </section>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="common-msg-error-perm">${uiLabelMap.WebtoolsViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="WebtoolsLayoutDemoOfbizWidgets">
+        <section>
+            <actions>
+
+            </actions>
+            <widgets>
+                <!-- 
+                <section name="h1-h6 Styles">
+                    <widgets>
+                        <horizontal-separator/>
+                        <label style="h1" text="H1."/>
+                        <label style="heading" text="H2."/>
+                        <label style="heading+1" text="H3."/>
+                        <label style="heading+2" text="H4."/>
+                        <label style="heading+3" text="H5."/>
+                        <label style="heading+4" text="H6."/>
+                    </widgets>
+                </section>
+                 
+                <section name="Form/List Styles">
+                    <widgets>
+                        <horizontal-separator/>
+                        <include-form name="LayoutDemoForm" location="component://webtools/widget/MiscForms.xml"/>                                        <section>
+                            <actions>
+                                <set field="tableStyle" value="${styles.table_data_list} dark-grid"/>
+                            </actions>
+                            <widgets/>
+                        </section>
+                        <section>
+                            <actions>
+                                <set field="altRowStyle" value="alternate-row"/>
+                                <set field="headerStyle" value="header-row-2"/>
+                                <set field="tableStyle" value="${styles.table_data_list} hover-bar"/>
+                            </actions>
+                            <widgets/>
+                        </section>
+                        <include-form name="LayoutDemoList" location="component://webtools/widget/MiscForms.xml"/>
+                    </widgets>
+                </section>
+                <section name="Screenlet Styles">
+                    <widgets>
+                        <screenlet title="${uiLabelMap.WebtoolsLayoutDemo}" padded="false">
+                            <section>
+                                <actions>
+                                    <set field="altRowStyle" value="alternate-row"/>
+                                    <set field="headerStyle" value="header-row-2"/>
+                                    <set field="tableStyle" value="${styles.table_data_list} hover-bar"/>
+                                    <set field="viewSize" value="1" type="Integer"/>
+                                </actions>
+                                <widgets/>
+                            </section>
+                            <include-form name="LayoutDemoList" location="component://webtools/widget/MiscForms.xml"/>
+                        </screenlet>
+                    </widgets>
+                </section>
+                -->
+                <screenlet title="Screenlets" id="my-widget-screenlet-parent" navigation-menu-name="WebtoolsInlineSectionMenuDemo">
+                    <include-menu location="component://webtools/widget/Menus.xml" name="WebtoolsInlineSectionMenuDemo"/>
+                    <label text="This section/screenlet has a special legacy Ofbiz navigation menu, rendered as section-inline menu type by default."/>
+                    <screenlet id="my-widget-screenlet-child" title="Complex title style" title-style="container:mycontainerclass;h:mytitleclass"></screenlet>
+                    <screenlet title="Complex title style 2 (override title elem)" title-style="container:mycontainerclass;container:+mytitleclass"></screenlet>
+                    <screenlet title="Complex title style 3 (no classes)" title-style="container;span"></screenlet>
+                </screenlet>
+                <screenlet title="Heading labels">
+                    <label style="container:mycontainerclass;heading:myheadingclass" text="Complex title style"/>
+                    <label style="heading:myheadingclass" text="Complex title style 3"/>
+                    <label style="div:mycontainerclass;h" text="Complex title style 4"/>
+                    <label style="h1" text="H1."/>
+                    <label style="h2" text="H2."/>
+                    <label style="h3" text="H3."/>
+                    <label style="h4" text="H4."/>
+                    <label style="h5" text="H5."/>
+                    <label style="h6" text="H6."/>
+                    <label style="heading" text="Heading+0"/>
+                    <label style="heading+1" text="Heading+1"/>
+                    <label style="heading+2" text="Heading+2"/>
+                    <label style="heading+3" text="Heading+3"/>
+                    <label style="heading+4:myheadingclass" text="Heading+4 (replacing class)"/>
+                    <label style="heading+4:+myheadingclass" text="Heading+4 (adding class)"/>
+                </screenlet>
+                <screenlet title="Specific markup labels">
+                    <label style="generic" text="Generic markup"/>
+                    <label text="Default markup"/> <!-- Scipio: NOTE: at time of writing this defaults to "p" -->
+                    <label style="p" text="Paragraph"/>
+                    <label style="span" text="Span"/>
+                    <label style="div" text="Div"/>
+                    <label style="myclass" text="Generic markup (with extra class)"/>
+                    <label style="+myclass" text="Generic markup (with extra class)"/>
+                    <label style="generic:myclass" text="Generic markup (with extra class)"/>
+                    <label style="generic:+myclass" text="Generic markup (with extra class)"/>
+                    <label style="p:myclass" text="Paragraph (with extra class)"/>
+                    <label style="span:+myclass" text="Span (with extra class)"/>
+                    <label style="div:+myclass" text="Div (with extra class)"/>
+                </screenlet>
+                <screenlet title="Common message labels">
+                    <label style="common-msg-result" text="Result message"/>
+                    <label style="common-msg-result-norecord" text=" "/>
+                    <label style="common-msg-warning" text="General warning message"/>
+                    <label style="common-msg-error" text="General error message"/>
+                    <label style="common-msg-error-perm" text="Permission error message"/>
+                    <label style="common-msg-error-security" text="Security error message"/>
+                    <label style="common-msg-custom" text="Custom common message"/>
+                    <label style="common-msg-error:+myclass" text="Error message (with extra class)"/>
+                    <label style="common-msg-error:myclass" text="Error message (with extra class that replaces default)"/>
+                    <label style="common-msg-info" text="Regular info message"/>
+                    <label style="common-msg-info-important" text="Important info message"/>
+                </screenlet>
+                <screenlet title="Widget menus">
+                    <label style="heading" text="Nested button menu (markup test only)" />
+                    <include-menu name="LayoutDemoButton2" location="component://webtools/widget/Menus.xml"/>
+                    <include-menu name="LayoutDemoNestedButton" location="component://webtools/widget/Menus.xml"/>
+                    <include-menu name="LayoutDemoButtonDropdown" location="component://webtools/widget/Menus.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+</screens>

@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-menu.xsd">
+    <menu name="WebtoolsAppBar" title="${uiLabelMap.FrameworkWebTools}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <!-- ToDo: Remove in favor of "Server" menu
+        <menu-item name="logging" title="${uiLabelMap.WebtoolsLogging}">
+            <link target="LogView"/>
+        </menu-item>
+        <menu-item name="cache" title="${uiLabelMap.WebtoolsCacheMaintenance}">
+            <link target="FindUtilCache"/>
+        </menu-item>
+        <menu-item name="artifact" title="${uiLabelMap.WebtoolsArtifactInfo}">
+            <link target="ViewComponents"/>
+        </menu-item>
+        <menu-item name="security" title="${uiLabelMap.CommonSecurity}">
+            <condition>
+                <if-service-permission service-name="securityPermissionCheck" main-action="VIEW"/>
+            </condition>
+            <link target="security"/>
+        </menu-item>
+         <menu-item name="stats" title="${uiLabelMap.WebtoolsStatistics}">
+            <link target="StatsSinceStart"/>
+        </menu-item>
+        <menu-item name="configuration" title="${uiLabelMap.WebtoolsCertsX509}">
+            <link target="myCertificates"/>
+        </menu-item>
+         -->
+        <menu-item name="server" title="${uiLabelMap.WebtoolsServer}">
+            <link target="LogView"/>
+        </menu-item>
+        <menu-item name="entity" title="${uiLabelMap.WebtoolsEntityEngine}">
+            <link target="entitymaint"/>
+        </menu-item>
+        <menu-item name="service" title="${uiLabelMap.WebtoolsServiceEngineTools}">
+            <link target="ServiceList"/>
+        </menu-item>
+        <menu-item name="labels" title="${uiLabelMap.WebtoolsLabelManager}">
+            <link target="SearchLabels"/>
+        </menu-item>
+        <menu-item name="importExport" title="${uiLabelMap.WebtoolsImportExport}">
+            <link target="xmldsdump"/>
+        </menu-item>
+        <menu-item name="geoManagement" title="${uiLabelMap.WebtoolsGeoManagement}">
+            <link target="FindGeo"/>
+        </menu-item> 
+        <!-- SCIPIO: Disabled for now -->       
+        <!-- <menu-item name="portalAdmin" title="${uiLabelMap.WebtoolsAdminPortalPage}">
+            <condition><if-has-permission permission="PORTALPAGE_ADMIN"/></condition>
+            <link target="FindPortalPage"/>
+        </menu-item> -->
+        <menu-item name="LayoutDemo" title="${uiLabelMap.WebtoolsLayoutDemo}">
+            <link target="WebtoolsLayoutDemo" />
+        </menu-item>
+        <menu-item name="solrAdmin" title="${uiLabelMap.WebtoolsSolrAdmin}">
+            <link target="/solr/admin.html" url-mode="plain" target-window="_blank"/>
+        </menu-item>
+    </menu>
+    <menu name="WebtoolsAppSideBar" title="${uiLabelMap.FrameworkWebTools}" extends="CommonAppSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="WebtoolsAppBar" recursive="full" />
+    </menu>
+
+    <menu name="configurationTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="page.activeSubMenuItem">
+        <menu-item name="tempexpr" title="${uiLabelMap.WebtoolsTemporalExpression}">
+            <link target="findTemporalExpression"/>
+        </menu-item>
+        <menu-item name="myCertificates" title="${uiLabelMap.WebtoolsMyCertificates}">
+            <link target="myCertificates"/>
+        </menu-item>
+    </menu>
+    <menu name="configurationSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="page.activeSubMenuItem">
+        <include-elements menu-name="configurationTabBar" recursive="includes-only" />
+    </menu>
+
+    <menu name="importExportTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="page.activeSubMenuItem">
+        <menu-item name="data" title="${uiLabelMap.WebtoolsDataFileTools}">
+            <link target="viewdatafile"/>
+        </menu-item>
+        <menu-item name="modelInduceFromDb" title="${uiLabelMap.WebtoolsInduceModelXMLFromDatabase}">
+            <link target="view/ModelInduceFromDb"/>
+        </menu-item>
+        <menu-item name="entityEoModelBundle" title="${uiLabelMap.WebtoolsExportEntityEoModelBundle}">
+            <link target="EntityEoModelBundle"/>
+        </menu-item>
+        <menu-item name="xmlDsDump" title="${uiLabelMap.PageTitleEntityExport}">
+            <link target="xmldsdump"/>
+        </menu-item>
+        <menu-item name="entityExportAll" title="${uiLabelMap.PageTitleEntityExportAll}">
+            <link target="EntityExportAll"/>
+        </menu-item>
+        <menu-item name="programExport" title="${uiLabelMap.PageTitleProgramExport}">
+            <link target="ProgramExport"/>
+        </menu-item>
+        <menu-item name="entityImport" title="${uiLabelMap.PageTitleEntityImport}">
+            <link target="EntityImport"/>
+        </menu-item>
+        <menu-item name="entityImportDir" title="${uiLabelMap.PageTitleEntityImportDir}">
+            <link target="EntityImportDir"/>
+        </menu-item>
+        <menu-item name="entityImportReaders" title="${uiLabelMap.PageTitleEntityImportReaders}">
+            <link target="EntityImportReaders"/>
+        </menu-item>
+    </menu>
+    <menu name="importExportSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="page.activeSubMenuItem">
+        <include-elements menu-name="importExportTabBar" recursive="includes-only" />
+    </menu>
+    
+    <menu name="serviceTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="page.activeSubMenuItem">
+        <menu-item name="serviceList" title="${uiLabelMap.WebtoolsServiceReference}">
+            <link target="ServiceList"/>
+        </menu-item>
+        <!-- ToDo: Taken over from LogView. Can probably be safely removed entirely.
+        <menu-item name="serviceLog" title="${uiLabelMap.WebtoolsServiceLog}">
+            <link target="ServiceLog"/>
+        </menu-item>
+         -->
+        <menu-item name="findJob" title="${uiLabelMap.WebtoolsJobList}">
+            <link target="FindJob"/>
+        </menu-item>
+        <menu-item name="threadList" title="${uiLabelMap.WebtoolsThreadList}">
+            <link target="threadList"/>
+        </menu-item>
+        <menu-item name="scheduleJob" title="${uiLabelMap.WebtoolsScheduleJob}">
+            <link target="scheduleJob"/>
+        </menu-item>
+        <menu-item name="runService" title="${uiLabelMap.PageTitleRunService}">
+            <link target="runService"/>
+        </menu-item>
+    </menu>
+    <menu name="serviceSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="page.activeSubMenuItem">
+        <include-elements menu-name="serviceTabBar" recursive="includes-only" />
+    </menu>
+
+    <menu name="ServerTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="logging" title="${uiLabelMap.WebtoolsLogging}">
+            <link target="LogView"/>
+        </menu-item>
+        <menu-item name="cache" title="${uiLabelMap.WebtoolsCacheMaintenance}">
+            <link target="FindUtilCache"/>
+        </menu-item>
+        <menu-item name="artifact" title="${uiLabelMap.WebtoolsArtifactInfo}">
+            <link target="ViewComponents"/>
+        </menu-item>
+        <menu-item name="security" title="${uiLabelMap.CommonSecurity}">
+            <condition>
+                <if-service-permission service-name="securityPermissionCheck" main-action="VIEW"/>
+            </condition>
+            <link target="security"/>
+        </menu-item>
+         <menu-item name="stats" title="${uiLabelMap.WebtoolsStatistics}">
+            <link target="StatsSinceStart"/>
+        </menu-item>
+        <menu-item name="configuration" title="${uiLabelMap.WebtoolsCertsX509}">
+            <link target="myCertificates"/>
+        </menu-item>
+    </menu>
+
+    <!-- SCIPIO: new Sidebar menu. Includes LogView, Cache Maintenance, Statistics, Certificates -->
+    <menu name="ServerSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="ServerTabBar" recursive="includes-only" />
+    </menu>
+
+    <!-- ToDo: Remove
+    <menu name="LoggingSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="LoggingTabBar" recursive="includes-only" />
+    </menu>
+    
+    <menu name="CacheTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="logMenuItem">
+        <menu-item name="findUtilCache" title="${uiLabelMap.WebtoolsCacheMaintenance}">
+            <link target="FindUtilCache"/>
+        </menu-item>
+    </menu>  
+     
+    <menu name="CacheSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="logMenuItem">
+        <include-elements menu-name="CacheTabBar" recursive="includes-only" />
+    </menu>
+    -->
+
+    <menu name="artifactTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="viewents" title="${uiLabelMap.WebtoolsViewComponents}">
+            <link target="ViewComponents"/>
+        </menu-item>
+        <menu-item name="artifactInfo" title="${uiLabelMap.WebtoolsArtifactInfo} ${uiLabelMap.CommonSearch} ${uiLabelMap.WebtoolsArtifactInfoTimeToLoad}">
+            <link target="ArtifactInfo"/>
+        </menu-item>
+    </menu>
+    
+    
+    <menu name="artifactSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="artifactTabBar" recursive="includes-only" />
+    </menu>
+    
+    <menu name="labelTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="labels" title="${uiLabelMap.WebtoolsLabelManager}">
+            <link target="SearchLabels"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="labelSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="labelTabBar" recursive="includes-only" />
+    </menu>
+    
+    <menu name="TempExprTabBar" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabMenuItem">
+        <menu-item name="findExpression" title="${uiLabelMap.CommonFind}">
+            <link target="findTemporalExpression"/>
+        </menu-item>
+        <menu-item name="editExpression" title="${uiLabelMap.CommonEdit}">
+            <condition>
+                <not><if-empty field="temporalExpression"/></not>
+            </condition>
+            <link target="editTemporalExpression">
+                <parameter param-name="tempExprId" from-field="temporalExpression.tempExprId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="EntityTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="entitymaint" title="${uiLabelMap.WebtoolsEntityDataMaintenance}">
+            <link target="entitymaint"/>
+        </menu-item>
+        <menu-item name="entityref" title="${uiLabelMap.WebtoolsEntityReference} - Interactive">
+            <link target="entityref" target-window="_BLANK"/>
+        </menu-item>
+        <menu-item name="entityrefStatic" title="${uiLabelMap.WebtoolsEntityReference} - ${uiLabelMap.WebtoolsEntityReferenceStaticVersion}">
+            <link target="entityref" target-window="_BLANK">
+                <parameter param-name="forstatic" value="true"/>
+            </link>
+        </menu-item>
+        <menu-item name="entityrefReport" title="${uiLabelMap.WebtoolsEntityReferencePdf}" widget-style="+${styles.action_run_sys} ${styles.action_export}">
+            <link target="entityrefReport" target-window="_BLANK"/>
+        </menu-item>
+        <menu-item name="EntitySQLProcessor" title="${uiLabelMap.PageTitleEntitySQLProcessor}">
+            <link target="EntitySQLProcessor"/>
+        </menu-item>
+        <menu-item name="entitySyncStatus" title="${uiLabelMap.WebtoolsEntitySyncStatus}">
+            <link target="EntitySyncStatus"/>
+        </menu-item>
+        <menu-item name="checkDb" title="${uiLabelMap.WebtoolsCheckUpdateDatabase}">
+            <link target="view/checkdb"/>
+        </menu-item>
+        <menu-item name="ConnectionPoolStatus" title="${uiLabelMap.ConnectionPoolStatus}">
+            <link target="ConnectionPoolStatus"/>
+        </menu-item>
+        <menu-item name="entityPerformanceTest" title="${uiLabelMap.WebtoolsPerformanceTests}">
+            <link target="EntityPerformanceTest"/>
+        </menu-item>
+        <menu-item name="EntityUtilityServices" title="Scipio ${uiLabelMap.WebtoolsUtilityServices}">
+            <link target="EntityUtilityServices"/>
+        </menu-item>
+        <menu-item name="ListDemoDataGeneratorServices" title="Scipio ${uiLabelMap.WebtoolsDemoDataGeneratorServiceList}">
+            <link target="ListDemoDataGeneratorServices"/>
+        </menu-item>
+    </menu>
+    <menu name="EntitySideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="EntityTabBar" recursive="includes-only" />
+    </menu>
+
+    <menu name="PortalPageAdmin">
+        <menu-item name="duplicate" title="${uiLabelMap.CommonDuplicate}">
+            <link target="DuplicatePortalPage">
+               <parameter param-name="portalPageId" from-field="parameters.portalPageId"/>
+            </link>
+        </menu-item>
+        <menu-item name="new" title="${uiLabelMap.CommonNew}" widget-style="+${styles.action_nav} ${styles.action_add}">
+            <link target="NewPortalPage"/>
+        </menu-item>
+        <menu-item name="refresh" title="${uiLabelMap.CommonRefresh}">
+            <link target="EditPortalPage">
+               <parameter param-name="portalPageId" from-field="parameters.portalPageId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="StatsTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="stats" title="${uiLabelMap.WebtoolsStatistics}">
+            <link target="StatsSinceStart"/>
+        </menu-item>
+        <menu-item name="metrics" title="${uiLabelMap.WebtoolsMetrics}">
+            <link target="ViewMetrics"/>
+        </menu-item>
+    </menu>
+    <menu name="StatsSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="StatsTabBar" recursive="includes-only" />
+    </menu>
+
+    <menu name="StatsSinceStart" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="clearStats" title="${uiLabelMap.WebtoolsStatsClearSince}">
+            <link target="StatsSinceStart">
+               <parameter param-name="clear" value="true"/>
+            </link>
+        </menu-item>
+        <menu-item name="refresh" title="${uiLabelMap.CommonRefresh}" widget-style="+refresh">
+            <link target="StatsSinceStart"/>
+        </menu-item>
+    </menu>
+
+    <menu name="StatsBinHistory" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="refresh" title="${uiLabelMap.CommonRefresh}" widget-style="+refresh">
+            <link target="StatBinsHistory">
+               <parameter param-name="statsId" from-field="parameters.statsId"/>
+               <parameter param-name="type" from-field="parameters.type"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="FindCacheTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="refresh" title="${uiLabelMap.CommonRefresh}" widget-style="+refresh">
+            <link target="FindUtilCache"/>
+        </menu-item>
+        <menu-item name="clearAll" title="${uiLabelMap.WebtoolsClearAllCaches}">
+            <link target="FindUtilCacheClearAll"/>
+        </menu-item>
+        <menu-item name="forceGarbageCollection" title="${uiLabelMap.WebtoolsRunGC}">
+            <link target="ForceGarbageCollection"/>
+        </menu-item>
+    </menu>
+    <menu name="FindCacheSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="FindCacheTabBar" recursive="includes-only" />
+    </menu>
+
+    <menu name="CacheElements" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="back" title="${uiLabelMap.WebtoolsBackToCacheMaintenance}">
+            <link target="FindUtilCache"/>
+        </menu-item>
+    </menu>
+
+    <menu name="EditCache" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="clear" title="${uiLabelMap.WebtoolsClearThisCache}">
+            <link target="EditUtilCacheClear">
+               <parameter param-name="UTIL_CACHE_NAME" from-field="cacheName"/>
+               <parameter param-name="type" from-field="parameters.type"/>
+            </link>
+        </menu-item>
+        <menu-item name="back" title="${uiLabelMap.WebtoolsBackToCacheMaintenance}">
+            <link target="FindUtilCache"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="geoManagementTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+        menu-container-style="+${styles.menu_buttonstyle_alt2} ${styles.menu_noclear}">
+        <menu-item name="FindGeo" title="${uiLabelMap.WebtoolsGeosFind}">
+            <link target="FindGeo"/>            
+        </menu-item>
+        <menu-item name="EditGeo" title="${uiLabelMap.WebtoolsGeoCreateNew}" widget-style="+${styles.action_nav} ${styles.action_add}">
+            <link target="EditGeo">
+                <parameter param-name="geoId" from-field="parameters.geoId"/>
+            </link>
+        </menu-item>
+        <menu-item name="LinkGeos" title="${uiLabelMap.WebtoolsGeosLink}">
+            <link target="LinkGeos">
+                <parameter param-name="geoId" from-field="parameters.geoId"/>
+            </link>
+        </menu-item>
+    </menu>    
+    <menu name="geoManagementSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <include-elements menu-name="geoManagementTabBar" recursive="includes-only" />
+    </menu>
+    
+    <menu name="LayoutDemoSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="Selected" title="${uiLabelMap.CommonSelected}"> <!-- widget-style="+${styles.menu_sidebar_itemactive}" -->
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="Enabled" title="${uiLabelMap.CommonEnabled}">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="Disabled" title="${uiLabelMap.CommonDisabled}" disable-if-empty="nonExistentVar">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="LayoutDemoDebug" title="Layout Demo (Debug)">
+            <condition>
+                <if-compare field="debugMode" operator="not-equals" value="true" />
+            </condition>
+            <link target="${demoTargetUrl}">
+                <parameter param-name="debugMode" value="true"/>
+            </link>
+        </menu-item>
+        <menu-item name="LayoutDemo" title="Layout Demo (Reg)">
+            <condition>
+                <if-compare field="debugMode" operator="equals" value="true" />
+            </condition>
+            <link target="${demoTargetUrl}"/>
+        </menu-item>
+    </menu>
+    
+    <!-- Scipio: DemoDataGenerator sidebar menu -->
+    <menu name="DemoDataGeneratorSideBar" extends="CommonSideBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="ListDemoDataGeneratorServices" title="${uiLabelMap.WebtoolsDemoDataGeneratorServiceList}">
+            <link target="ListDemoDataGeneratorServices">                
+            </link>
+        </menu-item>
+       <!--  <menu-item name="ListDemoDataGeneratorProviders" title="${uiLabelMap.WebtoolsDemoDataGeneratorProviders}">
+            <link target="ListDemoDataGeneratorProviders">                
+            </link>
+        </menu-item> -->
+    </menu>
+    
+    <menu name="LayoutDemoButton" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="Selected" title="${uiLabelMap.CommonSelected}">
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="Enabled" title="${uiLabelMap.CommonEnabled}">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <!-- Scipio: nested menu test -->
+    <menu name="LayoutDemoNestedButton" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="top1" title="Toplevel1">
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+            <menu-item name="nested1" title="Nested1">
+                <link target="${demoTargetUrl}">
+                    <parameter param-name="demoParam1"/>
+                    <parameter param-name="demoParam2"/>
+                    <parameter param-name="demoParam3"/>
+                </link>
+            </menu-item>
+            <menu-item name="nested2" title="Nested2" sub-menu-style="+my-sub-menu" sub-menu-title="My Sub Menu Title">
+                <link target="${demoTargetUrl}">
+                    <parameter param-name="demoParam1"/>
+                    <parameter param-name="demoParam2"/>
+                    <parameter param-name="demoParam3"/>
+                </link>
+                <menu-item name="nestednested1" title="Nestednested1">
+                    <link target="${demoTargetUrl}" link-type="hidden-form">
+                        <parameter param-name="demoParam1"/>
+                        <parameter param-name="demoParam2"/>
+                        <parameter param-name="demoParam3"/>
+                    </link>
+                </menu-item>
+                <menu-item name="nestednested2" title="Nestednested2">
+                    <link target="${demoTargetUrl}">
+                        <parameter param-name="demoParam1"/>
+                        <parameter param-name="demoParam2"/>
+                        <parameter param-name="demoParam3"/>
+                    </link>
+                </menu-item>
+                <!-- Scipio: This is a sub-dropdown button menu, implemented manually. It's better to use sub-menu-model now (see other menu), but this would be roughly equivalent (in this case). -->
+                <menu-item name="nestednested3" sub-menu-style="menu-type-button-dropdown" sub-menu-title="Nestednested3">
+                    <menu-item name="nestednestednested1" title="Nestednestednested1" link-style="=${styles.menu_button_dropdown_item}" selected-style="=${styles.menu_button_dropdown_itemactive}">
+                        <link target="${demoTargetUrl}">
+                            <parameter param-name="demoParam1"/>
+                            <parameter param-name="demoParam2"/>
+                            <parameter param-name="demoParam3"/>
+                        </link>
+                    </menu-item>
+                    <menu-item name="nestednestednested2" title="Nestednestednested2" link-style="=${styles.menu_button_dropdown_item}" selected-style="=${styles.menu_button_dropdown_itemactive}">
+                        <link target="${demoTargetUrl}" link-type="hidden-form">
+                            <parameter param-name="demoParam1"/>
+                            <parameter param-name="demoParam2"/>
+                            <parameter param-name="demoParam3"/>
+                        </link>
+                    </menu-item>
+                </menu-item>
+            </menu-item>
+            <menu-item name="nested3" title="Nested3"></menu-item>
+            <menu-item name="nested4" title="Nested4"></menu-item>
+        </menu-item>
+        <menu-item name="top2" title="Toplevel2">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="top3" title="Toplevel3">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+                <image src="/images/products/GZ-1000/small.png" />
+            </link>
+        </menu-item>
+    </menu>
+    
+    <!-- Scipio: Just here to demonstrate sub-menu-model local lookup -->
+    <menu name="LayoutDemoButtonDropdownMenuModel" extends="CommonButtonDropdownMenu" extends-resource="component://common/widget/CommonMenus.xml"
+        default-link-style="+my-dropdown-item-link">
+    </menu>
+    
+    <!-- Scipio: button menu with nested button-dropdown test -->
+    <menu name="LayoutDemoButton2" menu-container-style="+my-special-button-menu" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml" 
+        default-widget-style="+my-list-item">
+        <menu-item name="top1" title="Toplevel1" widget-style="my-list-item-override-style">
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="top2" title="Toplevel2" widget-style="+my-list-item-extra-style">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <!-- Scipio: It's now possible to use an inlined sub-menu of different type (with button-dropdown, omit the menu-item title and link and 
+            use sub-menu-title instead). sub-menu-model means the default styles will be fetched from the specified menu
+            instead of this top-level menu. -->
+        <menu-item name="top3" sub-menu-model="component://common/widget/CommonMenus.xml#CommonButtonDropdownMenu" sub-menu-title="Sub-menu, as button-dropdown">
+            <menu-item name="nestednestednested1" title="Nestednestednested1">
+                <link target="${demoTargetUrl}">
+                    <parameter param-name="demoParam1"/>
+                    <parameter param-name="demoParam2"/>
+                    <parameter param-name="demoParam3"/>
+                </link>
+            </menu-item>
+            <menu-item name="nestednestednested2" title="Nestednestednested2">
+                <link target="${demoTargetUrl}" link-type="hidden-form">
+                    <parameter param-name="demoParam1"/>
+                    <parameter param-name="demoParam2"/>
+                    <parameter param-name="demoParam3"/>
+                </link>
+            </menu-item>
+        </menu-item>
+        <menu-item name="top4" title="Toplevel4" disable-if-empty="nonExistentVar">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="top5" sub-menu-model="component://webtools/widget/Menus.xml#LayoutDemoButtonDropdownMenuModel" sub-menu-title="Sub-menu, as button-dropdown">
+            <menu-item name="nestednestednested1" title="Nestednestednested1">
+                <link target="${demoTargetUrl}">
+                    <parameter param-name="demoParam1"/>
+                    <parameter param-name="demoParam2"/>
+                    <parameter param-name="demoParam3"/>
+                </link>
+            </menu-item>
+            <menu-item name="nestednestednested2" title="Nestednestednested2">
+                <link target="${demoTargetUrl}" link-type="hidden-form">
+                    <parameter param-name="demoParam1"/>
+                    <parameter param-name="demoParam2"/>
+                    <parameter param-name="demoParam3"/>
+                </link>
+            </menu-item>
+        </menu-item>
+    </menu>
+    
+    <menu name="LayoutDemoButtonDropdown" title="Dropdown button menu" extends="CommonButtonDropdownMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="Selected" title="${uiLabelMap.CommonSelected}">
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="Enabled" title="${uiLabelMap.CommonEnabled}">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="WebtoolsInlineSectionMenuDemo">
+        <menu-item name="item1" title="Inline-Section Menu Item 1">
+            <link target="${demoTargetUrl}">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+        <menu-item name="item2" title="Inline-Section Menu Item 2">
+            <link target="${demoTargetUrl}" link-type="hidden-form">
+                <parameter param-name="demoParam1"/>
+                <parameter param-name="demoParam2"/>
+                <parameter param-name="demoParam3"/>
+            </link>
+        </menu-item>
+    </menu> 
+
+</menus>

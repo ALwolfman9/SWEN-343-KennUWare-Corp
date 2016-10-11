@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!-- 
+Scipio: In Scipio, the form widget language is modified from stock Ofbiz with new elements and
+modifications to existing elements. Changes are prefixed with the string "Scipio:" in annotations.
+
+Features and Modifications:
+* All default-xxx-style and xxx-style attributes now support an extended "+/=" prefix.
+  It works similarly to the one used for "class" arguments in Scipio Freemarker standard macros.
+  "+": means this style will be appended to this menu's default or to the parent menu's default,
+       and in general will never replace another style.
+  "=": means this style will replace the menu's default or the parent (extended) menu's default.
+       This is effectively the DEFAULT for all non-empty styles.
+       Currently, this _may_ also affect defaults looked up in the Scipio standard widget macro Freemarker implementation
+       (component://widget/templates/htmlMenuMacroLibrary.ftl).
+* Secondary/extra styles behavior: In Scipio menu widgets, secondary styles such as
+  selected-style and disabled-title-style are now always APPENDED to the main widget-style (and
+  +/= prefix does not affect this).
+  In stock Ofbiz, this behavior is inconsistent; earlier versions used replacement by default.
+  The new appending behavior is the same as used in the Scipio Freemarker @menu macro.
+  It is simpler to use, but has some limitations (can't replace the widget-style).
+* Menus can include each other's elements, independently of "extends".
+  (include-elements, include-actions, include-menu-items)
+* Menu items can be sorted. (items-sort-mode, sort-mode)
+* Menu items can completely override parent ("extends") menu items. (override-mode)
+* Nested sub-menu items can be styled using different defaults than the top-level menu. 
+  (functional, but currently limited to styling purposes only) (sub-menu-model)
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:include schemaLocation="http://ofbiz.apache.org/dtds/widget-common.xsd" />
+    <xs:element name="menus">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="menu"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="menu">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="include-elements" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="include-actions" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="include-menu-items" />
+                <xs:element minOccurs="0" ref="actions" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="menu-item" />
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name" use="required" />
+            <xs:attribute name="type" default="simple">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="simple" />
+                        <xs:enumeration value="cascade" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="id" />
+            <xs:attribute type="xs:string" name="title" />
+            <xs:attribute type="xs:string" name="tooltip" />
+            <xs:attribute type="xs:string" name="default-entity-name" />
+            <xs:attribute type="xs:string" name="default-title-style" />
+            <xs:attribute type="xs:string" name="default-widget-style" />
+            <xs:attribute type="xs:string" name="default-link-style">
+                <xs:annotation>
+                    <xs:documentation>Scipio: Default link style for the links in the menu items of this menu.
+                        Each menu item can override with either "link-style" on menu-item element (preferred) or "style" on link element (discouraged).
+                        NOTE: This is currently the only </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="default-tooltip-style" />
+            <xs:attribute type="xs:string" name="default-selected-style" />
+            <xs:attribute type="xs:string" name="default-align-style" />
+            <xs:attribute type="xs:string" name="extra-index" />
+            <xs:attribute name="orientation" default="horizontal">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="vertical" />
+                        <xs:enumeration value="horizontal" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="extends" />
+            <xs:attribute type="xs:string" name="extends-resource" />
+            <xs:attribute type="xs:string" name="default-menu-item-name" />
+            <xs:attribute type="xs:string" name="default-associated-content-id" />
+            <xs:attribute name="default-hide-if-selected" default="false">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="menu-width" />
+            <xs:attribute type="xs:string" name="default-cell-width" />
+            <xs:attribute type="xs:string" name="default-disabled-title-style" />
+            <xs:attribute type="xs:string" name="selected-menuitem-context-field-name">
+                <xs:annotation>
+                    <xs:documentation>Selected menu item context field name. Name of a field in context (usually set by screens) that will be checked for a menu item name.
+                        The menu item that matches this field value by name will receive a selection style ('default-selected-style' or 'selected-style').
+                        Scipio: This is a STOCK attribute. This attribute has been upgraded to support multiple field names, semicolon-separated (;).
+                        With a single field name or expression, the behavior is unchanged from the STOCK implementation.
+                        With multiple semicolon-separated names, in the order given, if the first field's value in context is empty OR does not
+                        match any menu item name in this menu, it will check the next, and so on.
+                        NOTE: default-menu-item-name is explicitly excluded from the "does this field exist in menu?" logic - 
+                            default-menu-item-name is only used when all of the listed fields were empty (legacy stock behavior).</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="menu-container-style">
+                <xs:annotation>
+                    <xs:documentation>The style of the container that encloses the menu items. This
+                    attribute is ignored when the id attribute is not empty.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="default-align" default="left">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="left" />
+                        <xs:enumeration value="right" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="fill-style" />
+            <xs:attribute type="xs:string" name="default-permission-operation" />
+            <xs:attribute type="xs:string" name="default-permission-entity-action" />
+            <xs:attribute name="items-sort-mode">
+                <xs:annotation>
+                    <xs:documentation>Scipio: If true, sort final menu items by some attribute, defined by the value. Default off.
+                        displaytext means try to use linktext, if none use title, if none use name.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="off" />
+                        <xs:enumeration value="name" />
+                        <xs:enumeration value="name-ignorecase" />
+                        <xs:enumeration value="title" />
+                        <xs:enumeration value="title-ignorecase" />
+                        <xs:enumeration value="linktext" />
+                        <xs:enumeration value="linktext-ignorecase" />
+                        <xs:enumeration value="displaytext" />
+                        <xs:enumeration value="displaytext-ignorecase" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="include-elements">
+        <xs:annotation>
+            <xs:documentation>Scipio: Includes another menu's elements (actions and menu items) into this one. Works on a textual xml level.
+                This is a convenience directive and same as declaring all the other include-* directives individually.
+                Can use to include all elements from another menu at first, then later split into more precise directives as needed.
+                The more precise directives will override this one for a given menu.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute type="xs:string" name="menu-name" use="required" />
+            <xs:attribute type="xs:string" name="resource" />
+            <xs:attribute name="recursive" use="required">
+                <xs:annotation>
+                    <xs:documentation>Scipio: If and what to recurse when included menus have their own extends and includes, to find elements.
+                        'includes-only' means it will follow includes in the target menu. 
+                        'extends-only' means it will follow extends directives in the target menu.
+                        'full' means will follow all of the above.
+                        'no' means will follow none.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="no" />
+                        <xs:enumeration value="includes-only" />
+                        <xs:enumeration value="extends-only" />
+                        <xs:enumeration value="full" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="include-actions">
+        <xs:annotation>
+            <xs:documentation>Scipio: Includes another menu's actions into this one. Works on a textual xml level.
+                Warning: diamond-like include+extends patterns can result in duplicate actions; use recursive with care.
+                Usually "includes-only" or "no" for recursive option is safest.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute type="xs:string" name="menu-name" use="required" />
+            <xs:attribute type="xs:string" name="resource" />
+            <xs:attribute name="recursive" use="required">
+                <xs:annotation>
+                    <xs:documentation>Scipio: If and what to recurse when included menus have their own extends and includes.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="no" />
+                        <xs:enumeration value="includes-only" />
+                        <xs:enumeration value="extends-only" />
+                        <xs:enumeration value="full" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="include-menu-items">
+        <xs:annotation>
+            <xs:documentation>Scipio: Includes another menu's items into this one. Works on a textual xml level.
+                Note: duplicates are not concern as menu items are keyed by name.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="exclude-item" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>Scipio: Menu-items to not include. helps as workaround to odd merging behavior. works recursively.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:attribute type="xs:string" name="name" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="menu-name" use="required" />
+            <xs:attribute type="xs:string" name="resource" />
+            <xs:attribute name="recursive" use="required">
+                <xs:annotation>
+                    <xs:documentation>Scipio: If and what to recurse when included menus have their own extends and includes.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="no" />
+                        <xs:enumeration value="includes-only" />
+                        <xs:enumeration value="extends-only" />
+                        <xs:enumeration value="full" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="menu-item">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="condition" minOccurs="0">
+                    <xs:complexType>
+                        <xs:complexContent>
+                            <xs:extension base="ConditionRootType">
+                                <xs:attribute type="xs:string" name="pass-style">
+                                    <xs:annotation>
+                                        <xs:documentation>
+                                            If a pass-style provided and the condition passes, the widget-style of
+                                            the parent menu-item is set with the pass-style. If no pass-style is given,
+                                            the widget-style is not changed.
+                                        </xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:attribute type="xs:string" name="disabled-style">
+                                    <xs:annotation>
+                                        <xs:documentation>
+                                            If a disabled-style provided and the condition fails, the disabled-style of
+                                            the parent menu-item is set with the disabled-style and processing is allowed to continue.
+                                            If no disabled-style is given, the widget-style is not changed and the menu-item is not rendered.
+                                        </xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                            </xs:extension>
+                        </xs:complexContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element minOccurs="0" ref="actions" />
+                <xs:element minOccurs="0" ref="link" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="menu-item" />
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name" use="required" />
+            <xs:attribute type="xs:string" name="title" />
+            <xs:attribute type="xs:string" name="parent-portal-page-value">
+                <xs:annotation>
+                    <xs:documentation>an expanded value of the parentPortalPageId in the Portal entity, will insert buttons using the portalId as the menuitem name portalPageName as the buttom title</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="tooltip" />
+            <xs:attribute type="xs:string" name="title-style" />
+            <xs:attribute type="xs:string" name="widget-style" />
+            <xs:attribute type="xs:string" name="link-style" />
+            <xs:attribute type="xs:string" name="align-style" />
+            <xs:attribute type="xs:string" name="tooltip-style" />
+            <xs:attribute type="xs:string" name="selected-style" />
+            <xs:attribute type="xs:string" name="position" default="1" />
+            <xs:attribute type="xs:string" name="associated-content-id" />
+            <xs:attribute type="xs:string" name="hide-if-selected" />
+            <xs:attribute type="xs:string" name="cell-width" />
+            <xs:attribute type="xs:string" name="disable-if-empty" />
+            <xs:attribute type="xs:string" name="disabled-title-style" />
+            <xs:attribute type="xs:string" name="target-window" />
+            <xs:attribute type="xs:string" name="sub-menu" />
+            <xs:attribute name="align">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="left" />
+                        <xs:enumeration value="right" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="override-mode" default="merge">
+                <xs:annotation>
+                    <xs:documentation>Scipio: Can be used to change the default override behavior.
+                        'replace' causes this item to override any prior definition instead of merging (merging in STOCK can be problematic).
+                        'remove-replace' is the same as replace but explicitly removes the previous item before replacing it;
+                        this is almost the same as 'replace' but allows changing the ordering.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="merge" />
+                        <xs:enumeration value="replace" />
+                        <xs:enumeration value="remove-replace" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="sort-mode" default="auto">
+                <xs:annotation>
+                    <xs:documentation>Scipio: Controls whether sorting applies to this item or
+                        not. Only meaningful when items-sort-mode is enabled.
+                        If set to off, item will try to remain at the same index of the menu items
+                        in which it was declared.
+                        NOTE: 'override-mode' can influence the final display order when combined with 'soft-mode' off.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="auto" />
+                        <xs:enumeration value="off" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="sub-menu-style">
+                <xs:annotation>
+                    <xs:documentation>Scipio: Style string for the sub-menu within this menu item.
+                        NOTE: Currently this has no relation to the (unused) "sub-menu" attribute.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="sub-menu-title">
+                <xs:annotation>
+                    <xs:documentation>Scipio: Title for the sub-menu within this menu item.
+                        NOTE: Currently this has no relation to the (unused) "sub-menu" attribute.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="sub-menu-model">
+                <xs:annotation>
+                    <xs:documentation>Scipio: Location in resource#name format of a menu to use as model for this item's sub-menu sub-items some of the
+                        attribute defaults such as styles, instead of this top-level menu's default attributes.
+                        Can be used to implement sub-menus of different types than the top-level menu.
+                        If no # separator, assumes name lookup in current file.
+                        NOTE (2016-03-01): This currently (intentionally) only works for style attributes; others still taken from top-level containing menu.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="link" type="link"/>
+
+    <xs:element name="actions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="AllActions"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="entity-and" substitutionGroup="AllActions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="field-map" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="select-field" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="order-by" />
+                <xs:choice minOccurs="0">
+                    <xs:element ref="limit-range" />
+                    <xs:element ref="limit-view" />
+                    <xs:element ref="use-iterator" />
+                </xs:choice>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="entity-name" use="required" />
+            <xs:attribute name="use-cache" default="false">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="filter-by-date" default="false">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                        <xs:enumeration value="by-name" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="list" use="required" />
+            <xs:attribute name="result-set-type" default="scroll">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="forward" />
+                        <xs:enumeration value="scroll" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="entity-condition" substitutionGroup="AllActions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:choice minOccurs="0">
+                    <xs:element ref="condition-expr" />
+                    <xs:element ref="condition-list" />
+                    <xs:element ref="condition-object" />
+                </xs:choice>
+                <xs:element minOccurs="0" ref="having-condition-list" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="select-field" />
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="order-by" />
+                <xs:choice minOccurs="0">
+                    <xs:element ref="limit-range" />
+                    <xs:element ref="limit-view" />
+                    <xs:element ref="use-iterator" />
+                </xs:choice>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="entity-name" use="required" />
+            <xs:attribute name="use-cache" default="false">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="filter-by-date" default="false">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                        <xs:enumeration value="by-name" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="distinct" default="false">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="true" />
+                        <xs:enumeration value="false" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute type="xs:string" name="delegator-name" />
+            <xs:attribute type="xs:string" name="list" use="required" />
+            <xs:attribute name="result-set-type" default="scroll">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="forward" />
+                        <xs:enumeration value="scroll" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

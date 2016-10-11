@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="main-decorator">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <set field="layoutSettings.companyName" from-field="uiLabelMap.AccountingCompanyName" global="true"/>
+                <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.AccountingCompanySubtitle" global="true"/>
+                <!-- layoutSettings.headerImageUrl can be used to specify an application specific logo; if not set,
+                     then the global layoutSettings.commonHeaderImageUrl (specified in GlobalDecorator) will be used. -->
+                <!--<set field="layoutSettings.headerImageUrl" value="/images/ofbiz_logo.gif" global="true"/>-->
+                <set field="activeApp" value="accounting" global="true"/>
+                <set field="applicationMenuName" value="AccountingAppBar" global="true"/>
+                <set field="applicationMenuLocation" value="component://accounting/widget/AccountingMenus.xml" global="true"/>
+                <set field="applicationTitle" value="${uiLabelMap.AccountingManagerApplication}" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml" auto-decorator-section-include="true">
+                    <!-- Scipio: NOTE: On most of the main-decorators including this one, override-by-auto-include is left disabled and is instead implemented manually with decorator-section-include.
+                        The manual inclusion is more flexible whereas the override-by-auto-include flag is easier to use. In some cases, override-by-auto-include="true" makes the decorator a lot easier to implement.
+                        Both are valid. -->
+                    <decorator-section name="left-column" use-when="${context.widePage != true}"> <!-- override-by-auto-include="true" -->
+                        <section>
+                            <condition>
+                                <not><if-empty-section section-name="left-column" /></not>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="left-column"/>
+                            </widgets>
+                            <fail-widgets>
+                                <!-- provide default column for all others -->
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="AccountingAppSideBar"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+ 
+    <screen name="CommonAgreementDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="agreements" />
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true" />
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true}" override-by-auto-include="true">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-service-permission service-name="acctgAgreementPermissionCheck"
+                                        main-action="VIEW" />
+                                    <not>
+                                        <if-empty field="agreement" />
+                                    </not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="AgreementSideBar" />
+                            </widgets>
+                            <fail-widgets>
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="AccountingAppSideBar"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgAgreementPermissionCheck"
+                                    main-action="VIEW" />
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not>
+                                            <if-empty field="agreement" />
+                                        </not>
+                                    </condition>
+                                    <widgets>
+                                        <label style="heading">${agreement.description} [${agreement.agreementId}]</label>
+                                        <section>
+                                            <condition>
+                                                <not>
+                                                    <if-empty field="agreementItem" />
+                                                </not>
+                                            </condition>
+                                            <widgets>
+                                                <include-menu location="component://accounting/widget/AccountingMenus.xml"
+                                                    name="AgreementItemTabBar" />
+                                                <container style="button-bar">
+                                                    <link target="EditAgreement" text="${uiLabelMap.AccountingNewAgreement}"
+                                                        style="${styles.link_nav} ${styles.action_add}" />
+                                                    <include-menu location="component://accounting/widget/AccountingMenus.xml"
+                                                        name="AgreementItemSubTabBar" />
+                                                </container>
+                                            </widgets>
+                                            <fail-widgets>
+                                                <container style="button-bar">
+                                                    <link target="EditAgreement" text="${uiLabelMap.AccountingNewAgreement}"
+                                                        style="${styles.link_nav} ${styles.action_add}" />
+                                                    <include-menu location="component://accounting/widget/AccountingMenus.xml"
+                                                        name="AgreementSubTabBar" />
+                                                </container>
+                                            </fail-widgets>
+                                        </section>
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body" />
+                            </widgets>
+                            <fail-widgets>
+                                <label style="common-msg-error-perm">${uiLabelMap.AccountingViewPermissionError}
+                                </label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CommonFinAccountDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="FindFinAccount"/>
+                <entity-one value-field="finAccount" entity-name="FinAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgFinAcctPermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition><not><if-empty field="finAccountId"/></not></condition>
+                                    <widgets>
+                                        <include-menu name="FinAccountTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                    </widgets>
+                                    <fail-widgets>
+                                        <include-menu name="FinAccountMainTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                    </fail-widgets>
+                                </section>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-service-permission service-name="acctgFinAcctPermissionCheck" main-action="VIEW"/></not>
+                            </condition>
+                            <widgets>
+                                <label style="h3" text="${uiLabelMap.AccountingViewPermissionError}"/>
+                            </widgets>
+                        </section>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonPaymentDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="payments"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true}" override-by-auto-include="true">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                                    <not><if-empty field="payment"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PaymentSideBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <!-- provide default column for all others -->
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="AccountingAppSideBar"/>                            
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PaymentSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                <!-- TODO: Scipio - I don't think this is needed -->
+                                <!-- <section>
+                                    <condition>
+                                        <not><if-empty field="paymentId"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <label style="heading" text="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonId}:[${paymentId}]  ${${extraFunctionName}}"/>
+                                    </widgets>
+                                </section>          -->                  
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="common-msg-error-perm" text="${uiLabelMap.AccountingViewPermissionError}"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonPaymentGroupDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="PaymentGroup"/>
+                <set field="paymentGroupId" from-field="parameters.paymentGroupId"/>
+                <entity-one entity-name="PaymentGroup" value-field="paymentGroup"/>
+                <entity-and entity-name="PaymentGroupMember" list="paymentGroupMembers" filter-by-date="true">
+                    <field-map field-name="paymentGroupId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true}" override-by-auto-include="true">
+                        <section>
+                            <condition>
+                                <and>
+                                    <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                                    <not><if-empty field="paymentGroup"/></not>
+                                </and>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PaymentGroupSideBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                            </widgets>
+                            <fail-widgets>
+                                <!-- provide default column for all others -->
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="AccountingAppSideBar"/>                            
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <include-menu name="PaymentGroupSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                <!-- TODO: Scipio - I don't think this is needed -->
+                                <!-- <section>
+                                    <condition>
+                                        <not><if-empty field="paymentGroupId"/></not>
+                                    </condition>
+                                    <widgets>     
+                                        <section>
+                                            <condition>
+                                                <not><if-empty field="title"/></not>
+                                            </condition>
+                                            <widgets>
+                                                <label style="heading" text="${title} ${uiLabelMap.CommonFor} ${paymenGroup.paymentGroupName} [${paymentGroupId}]"/>
+                                            </widgets>
+                                            <fail-widgets>
+                                                <label style="heading" text="${uiLabelMap[titleProperty]} ${uiLabelMap.CommonFor} ${paymenGroup.paymentGroupName} [${paymentGroupId}]"/>
+                                            </fail-widgets>
+                                        </section>                                   
+                                    </widgets>                                  
+                                </section> -->
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="common-msg-error-perm">${uiLabelMap.AccountingViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonPartyDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="companies"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true and not empty context.organizationPartyId}" override-by-auto-include="true">
+                        <include-menu name="OrganizationSideBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="organizationPartyId"/></not>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonOrganizationAccountingReportsDecorator">
+        <section>
+            <actions>
+                <set field="activeSubMenuItemTop" value="PartyAccounts"/>
+                <entity-one entity-name="PartyNameView" value-field="currentOrganization" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="organizationPartyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyDecorator" location="${parameters.partyDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="OrganizationTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <include-menu name="OrganizationReportsTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <label style="heading">${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}: ${currentOrganization.groupName} [${organizationPartyId}]</label>
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonAdminChecksDecorator">
+        <section>
+            <actions>
+                <set field="activeSubMenuItemTop" value="PartyAccounts"/>
+                <entity-one entity-name="PartyNameView" value-field="currentOrganization" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="organizationPartyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyDecorator" location="${parameters.partyDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-menu name="OrganizationTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <include-menu name="PartyAccountingChecksTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                        <label style="heading">${uiLabelMap.CommonFor}: ${currentOrganization.groupName} [${organizationPartyId}]</label>
+                        <decorator-section-include name="checks-body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CommonSettingsDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="settings" />                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true}" override-by-auto-include="true">
+                        <section>                            
+                            <widgets>
+                                <include-menu location="component://accounting/widget/AccountingMenus.xml" name="SettingsSideBar" />
+                            </widgets>                            
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>                            
+                            <widgets>
+                                <section>                                   
+                                    <widgets>
+                                        <label style="heading"></label>
+                                        <section>                                           
+                                        </section>
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body" />
+                            </widgets>
+                            <fail-widgets>
+                                <label style="common-msg-error-perm">${uiLabelMap.AccountingViewPermissionError}
+                                </label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="main">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="main"/>
+                <set field="activeSubMenuItem" from-field="activeMainMenuItem"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" default-value="${defaultOrganizationPartyId}" global="true"/>                
+                <set field="viewSize" value="10" />
+                <set field="titleProperty" value="Accounting"/>
+            </actions>
+            <widgets>
+                <!-- <platform-specific><html><html-template location="component://accounting/webapp/accounting/main.ftl"/></html></platform-specific> -->  
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">                    
+                    <decorator-section name="body">
+                        <container style="${styles.grid_row}">
+                            <container style="${styles.grid_large}6 ${styles.grid_cell}">
+                                    <include-screen name="ListPayments" location="component://accounting/widget/PaymentScreens.xml" />
+                            </container>
+                            <container style="${styles.grid_large}6 ${styles.grid_cell}">
+                                 <include-screen name="ScipioIncomesExpenses" location="component://accounting/widget/CommonScreens.xml"/>
+                            </container>
+                        </container>
+                    
+                        <container style="${styles.grid_row}">
+                            <container style="${styles.grid_large}6 ${styles.grid_cell}">
+                                 <include-screen name="ApPastDueInvoices" location="component://accounting/widget/ap/CommonScreens.xml"/>      
+                            </container>
+                            <container style="${styles.grid_large}6 ${styles.grid_cell}">
+                                <include-screen name="ArPastDueInvoices" location="component://accounting/widget/ar/CommonScreens.xml"/>
+                            </container>
+                        </container>
+                        
+                        <container style="${styles.grid_row}">
+                            <container style="${styles.grid_large}12 ${styles.grid_cell}">
+                            </container>                            
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+     <screen name="settings">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="companies"/>
+                <set field="activeSubMenuItem" from-field="activeMainMenuItem"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" default-value="${defaultOrganizationPartyId}" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSettingsDecorator" location="${parameters.mainDecoratorLocation}">                    
+                   <decorator-section name="body"></decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+     </screen>
+    
+
+    <screen name="creditCardFields">
+        <section>
+            <actions>
+                <set field="fieldNamePrefix" from-field="ccfFieldNamePrefix" default-value="${''}" />
+                <set field="showSecurityCodeField" from-field="ccfShowSecurityCodeField" type="Boolean" default-value="false" />
+                <!-- Scipio: Parametrized, to reuse actions here (once needed) -->
+                <set field="ccfTemplateLocation" from-field="ccfTemplateLocation" default-value="component://accounting/webapp/accounting/common/creditcardfields.ftl" />
+            </actions>
+            <widgets>
+                <platform-specific><html><html-template location="${ccfTemplateLocation}"/></html></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="GlobalGLSettingsDecorator">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="GlobalGLSettings"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="left-column" use-when="${context.widePage != true}" override-by-auto-include="true">
+                        <include-menu name="GlobalGLSettingMenus" location="component://accounting/widget/AccountingMenus.xml"/>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommonInvoiceDecorator"><!-- used for invoice commission runs -->
+        <section>
+            <widgets>
+                <include-screen name="CommonInvoiceDecorator" location="component://accounting/widget/InvoiceScreens.xml"/>
+            </widgets>
+        </section>
+    </screen>
+    
+    
+    <!-- SCIPIO: Widget implementation -->
+    <screen name="ScipioIncomesExpenses">
+        <section>
+            <actions>
+                <set field="chartType" value="bar"/>                                    
+                <set field="chartLibrary" value="chart"/>
+                <set field="chartIntervalScope" value="month"/>
+                <set field="chartIntervalCount" value="6"/>
+                <set field="chartDatasets" value="2"/>                                                                        
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" default-value="${defaultOrganizationPartyId}" global="true"/>                         
+                <set field="glFiscalTypeId" from-field="parameters.glFiscalTypeId" default-value="ACTUAL"/>
+                <set field="xlabel" value=""/> <!-- x-axis label -->
+                <set field="ylabel" value=""/> <!-- y-axis label -->
+                <set field="label1" value="${uiLabelMap.AccountingIncome}"/> <!-- 1st dataset label -->
+                <set field="label2" value="${uiLabelMap.AccountingExpenses}"/> <!-- 2nd dataset label -->  
+                <!-- IMPORTANT NOTE: This script only retrieves the existing (income/expense) transactions for the default 
+                currency defined in general.properties - currency.uom.id.default -->                                 
+                <script location="component://accounting/script/com/ilscipio/accounting/dashboard/IncomeExpenses.groovy"/>
+           </actions>
+           <widgets>
+                <section>
+                    <condition>
+                        <not>
+                            <if-empty field="totalMap"/>
+                        </not>
+                    </condition>
+                     <widgets>
+                       <screenlet title="${uiLabelMap.AccountingIncomesExpenses}">
+                           <platform-specific>
+                                <html><html-template location="component://accounting/webapp/accounting/dashboard/incomeExpenses.ftl"/></html>
+                            </platform-specific>
+                       </screenlet>     
+                   </widgets>
+                </section>
+           </widgets>
+        </section>
+    </screen>
+
+</screens>

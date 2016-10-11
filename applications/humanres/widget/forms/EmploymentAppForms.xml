@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="ListEmploymentApps" type="multi" list-name="listIt" use-row-submit="true" separate-columns="true" target="updateEmploymentAppExt?partyId=${partyId}&amp;&amp;referredByPartyId=${partyId}" paginate-target="FindEmploymentApps"
+        odd-row-style="alternate-row" header-row-style="header-row-2" > <!-- orig: default-table-style=-style="basic-table hover-bar" -->
+        <actions>
+            <set field="partyId" from-field="parameters.partyId"/>
+            <set field="referredByPartyId" from-field="parameters.partyId"/>
+            <entity-one entity-name="EmploymentApp" auto-field-map="true"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="employmentAppCtx"/>
+                <field-map field-name="entityName" value="EmploymentApp"/>
+                <field-map field-name="orderBy" value="applicationId"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+            <set field="insideEmployee" from-field="parameters.insideEmployee"/>
+        </actions>
+        <row-actions>
+            <set field="applicationId" from-field="applicationId"/>
+        </row-actions>
+        <alt-target use-when="insideEmployee==null" target="updateEmploymentApp"/>
+        <auto-fields-service default-field-type="hidden" service-name="updateEmploymentApp"/>
+        <field name="applicationId" title="${uiLabelMap.HumanResApplicationId}">
+            <!-- Scipio: full page link -->
+            <hyperlink target="EditEmploymentApp" description="${applicationId}" also-hidden="true">
+                <parameter param-name="applicationId"/>
+            </hyperlink>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="statusId" entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="EMPL_POSITION_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="emplPositionId" title="${uiLabelMap.FormFieldTitle_emplPositionId}"><lookup target-form-name="LookupEmplPosition"/></field>
+        <field name="jobRequisitionId" title="${uiLabelMap.FormFieldTitle_jobRequisitionId}"><lookup target-form-name="LookupJobRequisition"/></field>
+        <field name="employmentAppSourceTypeId">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${employmentAppSourceTypeId}" key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+                    <entity-order-by field-name="employmentAppSourceTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="partyId"><hidden/></field>
+        <field name="applyingPartyId" title="${uiLabelMap.FormFieldTitle_applyingPartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="referredByPartyId" title="${uiLabelMap.FormFieldTitle_referredByPartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="applicationDate" title="${uiLabelMap.FormFieldTitle_applicationDate}"><date-time/></field>
+        <field name="deleteAction" title="${uiLabelMap.CommonDelete}" widget-style="${styles.link_run_sys} ${styles.action_remove}">
+            <hyperlink target="deleteEmploymentApp" description="${uiLabelMap.CommonDelete}" also-hidden="true">
+                <parameter param-name="applicationId"/>
+                <parameter param-name="partyId"/>
+                <parameter param-name="referredByPartyId"/>
+            </hyperlink>
+        </field>
+        <!-- Scipio: there will be a checkbox... 
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><hidden value="Y"/></field>
+        -->
+        <field name="submitAction" title="${uiLabelMap.CommonSubmit}" widget-style="${styles.link_run_sys} ${styles.action_update}"><submit/></field>
+    </form>
+    <form name="FindEmploymentApps" type="single" target="FindEmploymentApps" header-row-style="header-row" default-map-name="employmentApp"> <!-- orig: default-table-style=-style="basic-table" -->
+        <actions>
+            <set field="referredByPartyId" from-field="parameters.partyId"/>
+        </actions>
+        <auto-fields-entity entity-name="EmploymentApp" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="emplPositionId"><lookup target-form-name="LookupEmplPosition"/></field>
+        <field name="applicationId"><lookup target-form-name="LookupEmploymentApp"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="statusId" entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="EMPL_POSITION_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="employmentAppSourceTypeId">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="applyingPartyId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="referredByPartyId" use-when="referredByPartyId==null">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="referredByPartyId" use-when="referredByPartyId!=null"><hidden/></field>
+        <field name="approverPartyId"><hidden/></field>
+        <field name="jobRequisitionId"><lookup target-form-name="LookupJobRequisition"/></field><!-- Scipio: show -->
+        <field name="searchAction" title="${uiLabelMap.CommonFind}" widget-style="${styles.link_run_sys} ${styles.action_find}"><submit button-type="button"/></field>
+    </form>
+    <form name="AddEmploymentApp" type="single" target="createEmploymentApp" default-entity-name="EmploymentApp" 
+        header-row-style="header-row"> <!-- orig: default-table-style=-style="basic-table" -->
+        <actions>
+            <set field="insideEmployee" from-field="parameters.insideEmployee"/>
+        </actions>
+        <alt-target use-when="insideEmployee != null" target="createEmploymentAppExt"/>
+        <!-- SCIPIO: I think this auto- may be necessary even if hidden for some field initializations? 
+            prevents us from reordering fields -->
+        <auto-fields-service service-name="createEmploymentApp" default-field-type="hidden"/>
+        <field name="partyId"><hidden value="${referredByPartyId}" /></field>
+        <field name="applicationId" tooltip="${uiLabelMap.CommonLeaveEmptyAutoValue}"><text/></field><!-- Scipio: this should auto-generated if absent: required-field="true" --><!-- Scipio: don't look this up, makes no sense: <lookup target-form-name="LookupEmploymentApp"/> -->
+        <field name="emplPositionId" tooltip="${uiLabelMap.HumanResEitherPositionOrRequisitionMustBeSpecified}"><lookup target-form-name="LookupEmplPosition"/></field>
+        <!-- Scipio: you should be able to specify job req instead of position -->
+        <field name="jobRequisitionId" tooltip="${uiLabelMap.HumanResEitherPositionOrRequisitionMustBeSpecified}"><lookup target-form-name="LookupJobRequisition"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" required-field="true"><!-- Scipio: required to avoid errors -->
+            <drop-down current-description=""><!-- Scipio: don't allow empty, to avoid confusion: allow-empty="true"  -->
+                <entity-options description="${description}" key-field-name="statusId" entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="EMPL_POSITION_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="applyingPartyId" required-field="true"><lookup target-form-name="LookupPartyName"/></field><!-- Scipio: required to avoid errors, somewhat nonsensical to leave empty -->
+        <field name="referredByPartyId" use-when="employmentApp==null"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="referredByPartyId" use-when="employmentApp!=null"><hidden/></field>
+        <field name="employmentAppSourceTypeId">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+                    <entity-order-by field-name="employmentAppSourceTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="applicationDate"><date-time default-value="${nowTimestamp}"/></field><!-- Scipio: pre-fill to now -->
+        <field name="submitAction" title="${uiLabelMap.CommonCreate}" widget-style="${styles.link_run_sys} ${styles.action_add}"><submit button-type="button"/></field>
+    </form>
+    
+    <!-- Scipio: WARN: Unfortunately this had to be duplicated from AddEmploymentApp -->
+    <form name="EditEmploymentApp" type="single" target="updateEmploymentAppSingle" default-entity-name="EmploymentApp" 
+        header-row-style="header-row"> <!-- orig: default-table-style=-style="basic-table" -->
+        <actions>
+            <set field="insideEmployee" from-field="parameters.insideEmployee"/>
+        </actions>
+        <alt-target use-when="insideEmployee != null" target="updateEmploymentAppExtSingle"/>
+        <!-- SCIPIO: I think this auto- may be necessary even if hidden for some field initializations? 
+            prevents us from reordering fields -->
+        <auto-fields-service service-name="updateEmploymentApp" default-field-type="hidden"/>
+        <field name="partyId"><hidden value="${referredByPartyId}" /></field>
+        <field name="applicationId"><display/></field>
+        <field name="emplPositionId" tooltip="${uiLabelMap.HumanResEitherPositionOrRequisitionMustBeSpecified}"><lookup target-form-name="LookupEmplPosition"/></field>
+        <!-- Scipio: you should be able to specify job req instead of position -->
+        <field name="jobRequisitionId" tooltip="${uiLabelMap.HumanResEitherPositionOrRequisitionMustBeSpecified}"><lookup target-form-name="LookupJobRequisition"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" required-field="true"><!-- Scipio: required to avoid errors -->
+            <drop-down current-description=""><!-- Scipio: don't allow empty, to avoid confusion: allow-empty="true"  -->
+                <entity-options description="${description}" key-field-name="statusId" entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" operator="equals" value="EMPL_POSITION_STATUS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="applyingPartyId" required-field="true"><lookup target-form-name="LookupPartyName"/></field><!-- Scipio: required to avoid errors, somewhat nonsensical to leave empty -->
+        <field name="referredByPartyId" use-when="employmentApp==null"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="referredByPartyId" use-when="employmentApp!=null"><hidden/></field>
+        <field name="employmentAppSourceTypeId">
+            <drop-down allow-empty="true" current-description="">
+                <entity-options description="${description}" key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+                    <entity-order-by field-name="employmentAppSourceTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="applicationDate"><date-time default-value="${nowTimestamp}"/></field><!-- Scipio: pre-fill to now -->
+        <field name="submitAction" title="${uiLabelMap.CommonUpdate}" widget-style="${styles.link_run_sys} ${styles.action_add}"><submit button-type="button"/></field>
+    </form>
+    
+    <!-- Scipio: new quick view form -->
+    <form name="ViewEmploymentApp" type="single" default-entity-name="EmploymentApp" 
+        header-row-style="header-row">
+        <actions>
+            <set field="insideEmployee" from-field="parameters.insideEmployee"/>
+        </actions>
+        <auto-fields-entity entity-name="EmploymentApp" default-field-type="display" map-name="employmentApp"/>
+    </form>
+</forms>

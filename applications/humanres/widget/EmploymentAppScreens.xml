@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+        
+    <!-- SCIPIO: FIXME: ALL THESE SCREENS ARE MISSING PERMISSION CHECKS -->
+    
+    <screen name="FindEmploymentApps">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HumanResFindEmploymentApp"/>
+                <set field="activeMainMenuItem" value="EmploymentApp"/>
+                <set field="employmentAppCtx" from-field="parameters"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEmploymentDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="menu-bar">
+                                <section>
+                                    <widgets>
+                                        <container style="button-bar">
+                                            <!-- Scipio: link to our new screen instead: NewEmploymentApp -->
+                                            <link target="EditEmploymentApp" text="${uiLabelMap.HumanResNewEmploymentApp}" style="${styles.link_nav} ${styles.action_add}"/>
+                                        </container>
+                                    </widgets>
+                                </section>
+                            </decorator-section>
+                            <decorator-section name="search-options">
+                                <include-form name="FindEmploymentApps" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListEmploymentApps" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditEmploymentApps">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleViewEmploymentApp"/>
+                <set field="activeMainMenuItem" value="Employee"/>
+                <set field="activeSubMenuItem" value="EditEmploymentApps"/>
+                <set field="referredByPartyId" from-field="parameters.partyId"/>
+                <set field="employmentAppCtx.applicationId" from-field="parameters.applicationId"/>
+                <set field="parameters.insideEmployee" value="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonPartyDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ListEmploymentApps" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                        <screenlet id="AddEmploymentAppPanel" title="${uiLabelMap.CommonAdd} ${uiLabelMap.HumanResEmploymentApp}" collapsible="true">
+                            <include-form name="AddEmploymentApp" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!-- SCIPIO: NOTE: This screen would be mainly for applicants to fill out themselves; e.g.
+        can't edit once submitted -->
+    <screen name="NewEmploymentApp">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HumanResNewEmploymentApp"/>
+                <set field="activeMainMenuItem" value="EmploymentApp"/>
+                <set field="applicationId" from-field="parameters.applicationId"/>
+                <entity-one entity-name="EmploymentApp" value-field="employmentApp"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEmploymentDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet>
+                            <include-form name="AddEmploymentApp" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- Scipio: new simple screen for editing individual appl (not in stock - stock only has new, above) 
+        Simpler version of EditEmploymentApps above.
+        NOTE: this screen would be mainly for admins, who can edit submitted applications. In admin
+        case it supersedes NewEmploymentApp -->
+    <screen name="EditEmploymentApp">
+        <section>
+            <actions>
+                <set field="activeMainMenuItem" value="EmploymentApp"/>
+                <set field="applicationId" from-field="parameters.applicationId"/>
+                <entity-one entity-name="EmploymentApp" value-field="employmentApp"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-empty field="employmentApp.applicationId"/>
+                    </condition>
+                    <widgets>
+                        <section>
+                            <actions>
+                                <set field="titleProperty" value="HumanResNewEmploymentApp"/>
+                            </actions>
+                            <widgets>
+                                <decorator-screen name="CommonEmploymentDecorator" location="${parameters.mainDecoratorLocation}">
+                                    <decorator-section name="body">
+                                        <screenlet>
+                                            <include-form name="AddEmploymentApp" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                                        </screenlet>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </widgets>
+                    <fail-widgets>
+                        <!-- FIXME: in this case should check if have rights to view/edit applicationId -->
+                        <section>
+                            <actions>
+                                <set field="titleProperty" value="HumanResEditEmploymentApp"/>
+                            </actions>
+                            <widgets>
+                                <decorator-screen name="CommonEmploymentDecorator" location="${parameters.mainDecoratorLocation}">
+                                    <decorator-section name="body">
+                                        <!-- SCIPIO: I added this link so you can toggle view the application with/without edit boxes, nowhere else can you do this -->
+                                        <container>
+                                            <link target="ViewEmploymentApp" text="${uiLabelMap.CommonView}" style="${styles.link_nav}">
+                                                <parameter param-name="applicationId" from-field="applicationId"/>
+                                            </link>
+                                        </container>
+                                        <screenlet>
+                                            <include-form name="EditEmploymentApp" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                                        </screenlet>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- Scipio: new simple screen for viewing appl (not in stock)  -->
+    <screen name="ViewEmploymentApp">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HumanResEmploymentApplication"/>
+                <set field="activeMainMenuItem" value="EmploymentApp"/>
+                <set field="applicationId" from-field="parameters.applicationId"/>
+                <entity-one entity-name="EmploymentApp" value-field="employmentApp"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEmploymentDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!-- SCIPIO: I added this link so you can toggle view the application with/without edit boxes, nowhere else can you do this -->
+                        <container>
+                            <link target="EditEmploymentApp" text="${uiLabelMap.CommonEdit}" style="${styles.link_nav}">
+                                <parameter param-name="applicationId" from-field="applicationId"/>
+                            </link>
+                        </container>
+                        <screenlet>
+                            <include-form name="ViewEmploymentApp" location="component://humanres/widget/forms/EmploymentAppForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ScipioNewApplications">
+        <section>
+            <actions>
+                <entity-condition entity-name="EmploymentApp" list="emplAppList" >
+                    <condition-list combine="or">
+                        <condition-expr field-name="statusId" value="EMPL_POS_ACTIVE"/>
+                        <!-- ?
+                        <condition-expr field-name="statusId" value="EMPL_POS_PLANNEDFOR"/>
+                        -->
+                        <!-- SCIPIO: NOTE: this status is unusual and used only in one place, but support it anyway -->
+                        <condition-expr field-name="statusId" value="IJP_APPLIED"/>
+                    </condition-list>
+                    <order-by field-name="-applicationDate" />
+                </entity-condition>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://humanres/webapp/humanres/humanres/emplapp/ScipioApplicationsSummary.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+</screens>
